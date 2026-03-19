@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ANIMAL☆コージのバナナダービー！</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #17120d 0%, #090909 100%);
+      color: #fff;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .panel {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    .top {
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.1;
+    }
+    .sub {
+      margin-top: 8px;
+      color: #d9d1c4;
+      font-size: 14px;
+    }
+    .hud {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 14px;
+    }
+    .badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: 14px;
+    }
+    .game {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top, rgba(255,220,140,.16), transparent 35%),
+        linear-gradient(180deg, #4a3520 0%, #1b140e 55%, #0f120d 100%);
+    }
+    .ground {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 24%;
+      background: linear-gradient(180deg, rgba(38,68,29,.3), rgba(18,46,18,.95));
+    }
+    .line {
+      position: absolute;
+      left: 24%;
+      right: 8%;
+      bottom: 22%;
+      border-top: 2px dashed rgba(255,255,255,.18);
+    }
+    .msg {
+      position: absolute;
+      left: 50%;
+      top: 14%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.38);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-weight: 700;
+      font-size: 18px;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+    .batter {
+      position: absolute;
+      left: 23%;
+      bottom: 18%;
+      transform: translateX(-50%);
+      width: 180px;
+      text-align: center;
+    }
+    .face {
+      font-size: 60px;
+      line-height: 1;
+    }
+    .label {
+      margin-top: 8px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .bat {
+      position: absolute;
+      left: calc(23% + 20px);
+      bottom: 26%;
+      transform-origin: left center;
+      font-size: 56px;
+      transition: transform .12s ease;
+    }
+    .ball, .launch {
+      position: absolute;
+      font-size: 40px;
+      line-height: 1;
+      user-select: none;
+    }
+    .controls {
+      padding: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      appearance: none;
+      border: 0;
+      background: #fff;
+      color: #111;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    button.secondary {
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .result {
+      padding: 18px;
+      text-align: center;
+      display: none;
+    }
+    .result.show {
+      display: block;
+    }
+    .result-title {
+      font-size: 28px;
+      font-weight: 900;
+    }
+    .result-sub {
+      margin-top: 8px;
+      color: #d6d0c7;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .stat {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 14px 10px;
+    }
+    .stat .k {
+      color: #cbbda6;
+      font-size: 12px;
+    }
+    .stat .v {
+      margin-top: 6px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+    .tips {
+      padding: 0 18px 20px;
+      color: #d7d2ca;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="top">
+        <h1>ANIMAL☆コージのバナナダービー！</h1>
+        <div class="sub">押忍だけで伝わるかと。</div>
+        <div class="hud">
+          <div class="badge">Score: <span id="score">0</span></div>
+          <div class="badge">HR: <span id="hr">0</span>/5</div>
+          <div class="badge">残り: <span id="left">10</span></div>
+          <div class="badge">Combo: <span id="combo">0</span></div>
+        </div>
+      </div>
+
+      <div class="game" id="game">
+        <div class="msg" id="msg">スタートを押して、タップでスイング</div>
+        <div class="ground"></div>
+        <div class="line"></div>
+
+        <div class="batter">
+          <div class="face" id="face">🥊</div>
+          <div class="label" id="faceLabel">そういうことかと。</div>
+        </div>
+
+        <div class="bat" id="bat">🍌</div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">試合開始</button>
+        <button class="secondary" id="swingBtn">スイング</button>
+      </div>
+
+      <div class="result" id="result">
+        <div class="result-title" id="resultTitle">SEXY AWARD</div>
+        <div class="result-sub" id="resultSub">誠にセクシーなホームランかと。</div>
+        <div class="stats">
+          <div class="stat"><div class="k">スコア</div><div class="v" id="rScore">0</div></div>
+          <div class="stat"><div class="k">ホームラン</div><div class="v" id="rHr">0</div></div>
+          <div class="stat"><div class="k">最大コンボ</div><div class="v" id="rCombo">0</div></div>
+        </div>
+      </div>
+
+      <div class="tips">
+        タップ操作だけで遊べる試作版。<br>
+        後でここに画像・BGM・SEを差し込める形にしてある。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const bat = document.getElementById("bat");
+    const msg = document.getElementById("msg");
+    const faceLabel = document.getElementById("faceLabel");
+    const startBtn = document.getElementById("startBtn");
+    const swingBtn = document.getElementById("swingBtn");
+    const result = document.getElementById("result");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultSub = document.getElementById("resultSub");
+
+    const scoreEl = document.getElementById("score");
+    const hrEl = document.getElementById("hr");
+    const leftEl = document.getElementById("left");
+    const comboEl = document.getElementById("combo");
+
+    const rScore = document.getElementById("rScore");
+    const rHr = document.getElementById("rHr");
+    const rCombo = document.getElementById("rCombo");
+
+    let score = 0;
+    let hr = 0;
+    let combo = 0;
+    let maxCombo = 0;
+    let left = 10;
+    let running = false;
+    let ball = null;
+    let ballX = 0;
+    let ballY = 0;
+    let vx = 0;
+    let anim = null;
+
+    const BAT_X = 220;
+    const START_X = 780;
+    const HIT_CENTER = 220;
+    const HIT_WINDOW = 38;
+
+    function updateHud() {
+      scoreEl.textContent = score;
+      hrEl.textContent = hr;
+      leftEl.textContent = left;
+      comboEl.textContent = combo;
+    }
+
+    function setFace(text) {
+      faceLabel.textContent = text;
+    }
+
+    function clearBall() {
+      if (ball) {
+        ball.remove();
+        ball = null;
+      }
+    }
+
+    function spawnBall() {
+      clearBall();
+      ball = document.createElement("div");
+      ball.className = "ball";
+      ball.textContent = "🍌";
+      game.appendChild(ball);
+      ballX = START_X;
+      ballY = 250 + (Math.random() * 90 - 45);
+      vx = 6.2 + Math.random() * 1.5;
+      drawBall();
+      moveBall();
+    }
+
+    function drawBall() {
+      if (!ball) return;
+      ball.style.left = ballX + "px";
+      ball.style.top = ballY + "px";
+    }
+
+    function moveBall() {
+      cancelAnimationFrame(anim);
+      function frame() {
+        if (!running || !ball) return;
+        ballX -= vx;
+        drawBall();
+
+        if (ballX < 150) {
+          clearBall();
+          combo = 0;
+          left--;
+          msg.textContent = "ミスは誰にでもあるかと。";
+          setFace("どういうことかと？");
+          updateHud();
+          checkNext();
+          return;
+        }
+        anim = requestAnimationFrame(frame);
+      }
+      anim = requestAnimationFrame(frame);
+    }
+
+    function launch(kind) {
+      const shot = document.createElement("div");
+      shot.className = "launch";
+      shot.textContent = kind === "perfect" ? "🔥" : "🍌";
+      shot.style.left = BAT_X + "px";
+      shot.style.top = ballY + "px";
+      game.appendChild(shot);
+
+      let x = BAT_X;
+      let y = ballY;
+
+      function fly() {
+        x += 10;
+        y -= 5;
+        shot.style.left = x + "px";
+        shot.style.top = y + "px";
+        if (x > 980) {
+          shot.remove();
+          return;
+        }
+        requestAnimationFrame(fly);
+      }
+      requestAnimationFrame(fly);
+    }
+
+    function swing() {
+      if (!running || !ball) return;
+
+      bat.style.transform = "rotate(-65deg) scaleX(1.1)";
+      setTimeout(() => {
+        bat.style.transform = "rotate(-8deg)";
+      }, 120);
+
+      const delta = Math.abs(ballX - HIT_CENTER);
+      clearBall();
+
+      if (delta <= 10) {
+        score += 100;
+        hr += 1;
+        combo += 1;
+        maxCombo = Math.max(maxCombo, combo);
+        msg.textContent = "誠にセクシーかと。100点";
+        setFace("誠にセクシーかと。100点");
+        launch("perfect");
+      } else if (delta <= 20) {
+        score += 60;
+        hr += 1;
+        combo += 1;
+        maxCombo = Math.max(maxCombo, combo);
+        msg.textContent = "たまげたことかと!?";
+        setFace("たまげたことかと!?");
+        launch("hr");
+      } else if (delta <= HIT_WINDOW) {
+        score += 25;
+        combo += 1;
+        maxCombo = Math.max(maxCombo, combo);
+        msg.textContent = "それみたことかと！";
+        setFace("それみたことかと！");
+        launch("hit");
+      } else {
+        combo = 0;
+        msg.textContent = "どういうことかと？";
+        setFace("どういうことかと？");
+      }
+
+      left--;
+      updateHud();
+      checkNext();
+    }
+
+    function checkNext() {
+      if (left <= 0) {
+        running = false;
+        result.classList.add("show");
+        rScore.textContent = score;
+        rHr.textContent = hr;
+        rCombo.textContent = maxCombo;
+
+        if (hr >= 5) {
+          resultTitle.textContent = "SEXY AWARD";
+          resultSub.textContent = "誠にセクシーなホームランかと。";
+        } else {
+          resultTitle.textContent = "もう寝ようかと。。";
+          resultSub.textContent = "ミスは誰にでもあるかと。";
+        }
+        return;
+      }
+
+      setTimeout(() => {
+        msg.textContent = "タップでスイング";
+        if (combo === 0) setFace("そういうことかと。");
+        spawnBall();
+      }, 650);
+    }
+
+    function startGame() {
+      cancelAnimationFrame(anim);
+      clearBall();
+      score = 0;
+      hr = 0;
+      combo = 0;
+      maxCombo = 0;
+      left = 10;
+      running = true;
+      result.classList.remove("show");
+      msg.textContent = "タップでスイング";
+      setFace("そういうことかと。");
+      updateHud();
+      spawnBall();
+    }
+
+    startBtn.addEventListener("click", startGame);
+    swingBtn.addEventListener("click", swing);
+    game.addEventListener("click", () => {
+      if (running) swing();
+    });
+
+    updateHud();
+  </script>
+</body>
+</html>

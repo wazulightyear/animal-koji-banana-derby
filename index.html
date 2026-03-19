@@ -209,10 +209,10 @@
         <div class="ground"></div>
         <div class="line"></div>
 
-        <div class="batter">
-          <div class="face" id="face">🥊</div>
-          <div class="label" id="faceLabel">そういうことかと。</div>
-        </div>
+<div class="batter">
+  <img id="batterImage" src="IMG_2321.jpeg" alt="ANIMAL☆コージ" style="width:180px;height:180px;object-fit:cover;border-radius:18px;border:1px solid rgba(255,255,255,.1);display:block;margin:0 auto 8px auto;">
+  <div class="label" id="faceLabel">そういうことかと。</div>
+</div>
 
         <div class="bat" id="bat">🍌</div>
       </div>
@@ -244,6 +244,8 @@
     const bat = document.getElementById("bat");
     const msg = document.getElementById("msg");
     const faceLabel = document.getElementById("faceLabel");
+    const batterImage = document.getElementById("batterImage");
+    const ASSETS = { idle: "IMG_2321.jpeg", miss: "IMG_2328.jpeg", hr: "IMG_2327.jpeg" };
     const startBtn = document.getElementById("startBtn");
     const swingBtn = document.getElementById("swingBtn");
     const result = document.getElementById("result");
@@ -284,8 +286,16 @@
     }
 
     function setFace(text) {
-      faceLabel.textContent = text;
-    }
+  faceLabel.textContent = text;
+
+  if (text.includes("そういうことかと") || text.includes("それみたことかと")) {
+    batterImage.src = ASSETS.idle;
+  } else if (text.includes("どういうことかと")) {
+    batterImage.src = ASSETS.miss;
+  } else if (text.includes("たまげたことかと") || text.includes("誠にセクシーかと")) {
+    batterImage.src = ASSETS.hr;
+  }
+}
 
     function clearBall() {
       if (ball) {
